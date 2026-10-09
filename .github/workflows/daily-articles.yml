@@ -1,0 +1,26 @@
+name: Daily Article Portal Check
+
+on:
+  schedule:
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check article data
+        run: |
+          python -c "import json; d=json.load(open('articles.json')); print('Article data loaded successfully. Articles:', len(d.get('articles', [])))"
+
+      - name: Check website file
+        run: |
+          test -f index.html
+          echo "Website file exists."
