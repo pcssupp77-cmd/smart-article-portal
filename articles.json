@@ -1,0 +1,18 @@
+{
+  "site": "Smart Article Portal",
+  "languages": ["hi", "en"],
+  "articles": [
+    {
+      "id": "online-safety-guide",
+      "title_en": "How to Stay Safe Online",
+      "title_hi": "इंटरनेट पर सुरक्षित कैसे रहें",
+      "category": "Technology",
+      "description_en": "Learn practical ways to protect your online accounts and personal information.",
+      "description_hi": "अपने ऑनलाइन अकाउंट और निजी जानकारी की सुरक्षा के व्यावहारिक तरीके जानें।",
+      "content_en": "Use unique passwords for important accounts. Enable two-factor authentication when available. Never share OTPs or passwords with unknown people. Check website addresses carefully before entering personal information.",
+      "content_hi": "महत्वपूर्ण अकाउंट के लिए अलग और मजबूत पासवर्ड रखें। जहाँ उपलब्ध हो, टू-फैक्टर ऑथेंटिकेशन चालू करें। किसी अनजान व्यक्ति के साथ OTP या पासवर्ड साझा न करें। निजी जानकारी डालने से पहले वेबसाइट का पता जाँचें।",
+      "tags": ["online safety", "internet security", "ऑनलाइन सुरक्षा"],
+      "status": "draft"
+    }
+  ]
+}
