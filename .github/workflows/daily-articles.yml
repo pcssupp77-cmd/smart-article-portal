@@ -1,26 +1,81 @@
-name: Daily Article Portal Check
+name: AI Article Generator
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "30 3 * * *"
-  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  check:
+  generate:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Check article data
-        run: |
-          python -c "import json; d=json.load(open('articles.json')); print('Article data loaded successfully. Articles:', len(d.get('articles', [])))"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-      - name: Check website file
+      - name: Generate articles
+        env:
+          AI_KEY: ${{ secrets.FREETHEAI_API_KEY }}
         run: |
-          test -f index.html
-          echo "Website file exists."
+          cat > generate.py <<'PY'
+          import os,json,urllib.request
+          from datetime import date
+
+          key=os.environ.get("AI_KEY")
+          if not key:
+              raise SystemExit("Missing FREETHEAI_API_KEY secret")
+
+          prompt="""Write one original, useful SEO article about Indian mining,
+          Odisha business, transport or technology. Output ONLY valid JSON:
+          {"title_en":"English title","title_hi":"Hindi title",
+          "category":"Mining","description":"Short summary",
+          "content":"Article of 500+ words in English and Hindi",
+          "tags":["India","Mining"],"status":"published"}"""
+
+          data=json.dumps({
+            "model":"free",
+            "messages":[{"role":"user","content":prompt}],
+            "temperature":0.7
+          }).encode()
+
+          req=urllib.request.Request(
+            "https://api.freetheai.org/v1/chat/completions",
+            data=data,
+            headers={"Authorization":"Bearer "+key,
+                     "Content-Type":"application/json"}
+          )
+
+          with urllib.request.urlopen(req,timeout=90) as r:
+              result=json.loads(r.read())
+
+          text=result["choices"][0]["message"]["content"]
+          text=text.strip().removeprefix("```json").removesuffix("```").strip()
+          article=json.loads(text)
+          article["date"]=str(date.today())
+
+          path="articles.json"
+          try:
+              with open(path,encoding="utf-8") as f:
+                  db=json.load(f)
+          except (FileNotFoundError,json.JSONDecodeError):
+              db={"articles":[]}
+
+          db["articles"].append(article)
+          with open(path,"w",encoding="utf-8") as f:
+              json.dump(db,f,ensure_ascii=False,indent=2)
+          print("Article generated:",article["title_en"])
+          PY
+          python generate.py
+
+      - name: Save article
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add articles.json
+          git diff --cached --quiet || git commit -m "Generate daily article"
+          git push
