@@ -2,118 +2,278 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Smart Article Portal | Trending Topics & Guides</title>
+<title>Smart Article Portal | Hindi & English Guides</title>
 
-<meta name="description" content="Discover trending topics, technology, business, education and useful how-to guides.">
+<meta name="description" content="Explore useful Hindi and English articles about technology, business, education and practical guides.">
+
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#10213a">
 
 <style>
+:root {
+  --primary: #10213a;
+  --accent: #e9a23b;
+  --bg: #f4f6fa;
+  --text: #202938;
+  --muted: #657084;
+}
+
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f5f7fb;
-    color: #222;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
 }
 
 header {
-    background: #14213d;
-    color: white;
-    padding: 22px 16px;
-    text-align: center;
+  background: var(--primary);
+  color: white;
+  padding: 30px 16px;
+  text-align: center;
 }
 
 header h1 {
-    margin: 0 0 10px;
+  margin: 0;
+  font-size: clamp(27px, 5vw, 40px);
 }
 
 header p {
-    margin: 0;
-    color: #dbe5ff;
+  margin: 8px 0 0;
+  color: #e0e8f6;
+}
+
+.topbar {
+  background: white;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e0e4eb;
+}
+
+.brand {
+  color: var(--primary);
+  font-weight: bold;
+  font-size: 18px;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+select, input {
+  padding: 11px;
+  border: 1px solid #d5dbe5;
+  border-radius: 8px;
+  background: white;
+  max-width: 100%;
 }
 
 nav {
-    background: #fff;
-    padding: 14px 10px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
+  background: white;
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #e0e4eb;
 }
 
 nav a {
-    display: inline-block;
-    margin: 5px 8px;
-    color: #14213d;
-    text-decoration: none;
-    font-weight: bold;
+  display: inline-block;
+  margin: 5px 9px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #b16c08;
 }
 
 .container {
-    max-width: 1100px;
-    margin: auto;
-    padding: 20px 15px;
+  width: min(1100px, 100%);
+  margin: auto;
+  padding: 25px 16px;
 }
 
-.section-title {
-    margin-bottom: 18px;
+.hero {
+  padding: 25px 0;
+}
+
+.hero h2 {
+  font-size: clamp(25px, 4vw, 35px);
+  line-height: 1.3;
+  margin: 0 0 10px;
+}
+
+.hero p {
+  color: var(--muted);
+}
+
+.searchbar {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.searchbar input {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn {
+  background: var(--primary);
+  color: white;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 8px;
+}
+
+.btn:hover {
+  background: #233e64;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 15px 0 22px;
+}
+
+.filter {
+  background: white;
+  color: var(--primary);
+  border: 1px solid #d5dbe5;
+  padding: 8px 12px;
+  border-radius: 20px;
+}
+
+.filter.active {
+  background: var(--primary);
+  color: white;
 }
 
 .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 18px;
 }
 
 .card {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 10px #0000000d;
+  background: white;
+  border: 1px solid #e8ebf1;
+  border-radius: 12px;
+  padding: 21px;
+  box-shadow: 0 3px 12px #172b4d0a;
 }
 
 .card h3 {
-    margin-top: 0;
-    color: #14213d;
+  margin: 10px 0;
+  line-height: 1.4;
 }
 
 .card p {
-    line-height: 1.6;
-    color: #555;
+  color: var(--muted);
 }
 
 .badge {
-    display: inline-block;
-    background: #e5edff;
-    color: #174ea6;
-    padding: 5px 9px;
-    border-radius: 5px;
-    font-size: 12px;
+  display: inline-block;
+  background: #edf2ff;
+  color: #244e9a;
+  padding: 4px 9px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.readmore {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #174ea6;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.article-view {
+  display: none;
+  background: white;
+  padding: clamp(18px, 4vw, 40px);
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.article-view h1 {
+  line-height: 1.3;
+}
+
+.article-body {
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.article-body h2 {
+  margin-top: 28px;
+}
+
+.notice {
+  background: #fff6df;
+  border-left: 4px solid var(--accent);
+  padding: 12px;
+  border-radius: 5px;
+}
+
+.empty {
+  display: none;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
 }
 
 footer {
-    margin-top: 35px;
-    padding: 25px 15px;
-    background: #14213d;
-    color: white;
-    text-align: center;
+  background: var(--primary);
+  color: white;
+  text-align: center;
+  padding: 28px 15px;
+  margin-top: 40px;
 }
 
 footer a {
-    color: white;
-    margin: 0 8px;
+  color: white;
+  margin: 5px 8px;
 }
 
 footer p {
-    line-height: 1.8;
+  overflow-wrap: anywhere;
 }
 
-@media (max-width: 600px) {
-    header h1 {
-        font-size: 25px;
-    }
+@media (max-width: 500px) {
+  .searchbar {
+    flex-direction: column;
+  }
+
+  .searchbar button {
+    width: 100%;
+  }
+
+  .topbar {
+    justify-content: center;
+  }
 }
 </style>
 </head>
@@ -121,66 +281,324 @@ footer p {
 <body>
 
 <header>
-    <h1>Smart Article Portal</h1>
-    <p>Explore useful knowledge, technology and trending topics</p>
+  <h1>Smart Article Portal</h1>
+  <p id="tagline">Useful knowledge, explained simply.</p>
 </header>
 
+<div class="topbar">
+  <div class="brand">Smart Article Portal</div>
+  <label>
+    <span id="languageLabel">Language:</span>
+    <select id="language" aria-label="Select language">
+      <option value="en">English</option>
+      <option value="hi">हिंदी</option>
+    </select>
+  </label>
+</div>
+
 <nav>
-    <a href="/">Home</a>
-    <a href="#technology">Technology</a>
-    <a href="#business">Business</a>
-    <a href="#education">Education</a>
-    <a href="#guides">How-to Guides</a>
+  <a href="./" id="navHome">Home</a>
+  <a href="#articles" id="navArticles">Articles</a>
+  <a href="#technology" data-category="Technology">Technology</a>
+  <a href="#business" data-category="Business">Business</a>
+  <a href="#education" data-category="Education">Education</a>
+  <a href="#guides" data-category="Guides">How-to Guides</a>
 </nav>
 
 <main class="container">
 
-    <h2 class="section-title">Explore Our Articles</h2>
+  <section class="hero">
+    <h2 id="heroTitle">Discover useful articles for everyday life</h2>
+    <p id="heroDescription">
+      Explore technology, business, education and practical guides.
+    </p>
 
-    <div class="grid">
+    <div class="searchbar">
+      <input id="search" type="search"
+        placeholder="Search articles..."
+        aria-label="Search articles">
+      <button class="btn" id="searchButton">Search</button>
+    </div>
+  </section>
 
-        <article class="card" id="technology">
-            <span class="badge">Technology</span>
-            <h3>Technology and AI Guides</h3>
-            <p>Learn about useful technology, artificial intelligence tools and digital solutions.</p>
-        </article>
+  <section id="articleList">
+    <h2 id="articlesTitle">Explore Articles</h2>
 
-        <article class="card" id="business">
-            <span class="badge">Business</span>
-            <h3>Business and Market Insights</h3>
-            <p>Explore business information, market developments and practical business guides.</p>
-        </article>
-
-        <article class="card" id="education">
-            <span class="badge">Education</span>
-            <h3>Education and Career</h3>
-            <p>Discover educational resources, career guidance and learning opportunities.</p>
-        </article>
-
-        <article class="card" id="guides">
-            <span class="badge">How-to Guides</span>
-            <h3>Practical Step-by-Step Guides</h3>
-            <p>Find helpful explanations and instructions for everyday problems.</p>
-        </article>
-
+    <div class="filters">
+      <button class="filter active" data-filter="All" id="filterAll">All</button>
+      <button class="filter" data-filter="Technology" id="filterTech">Technology</button>
+      <button class="filter" data-filter="Business" id="filterBusiness">Business</button>
+      <button class="filter" data-filter="Education" id="filterEducation">Education</button>
+      <button class="filter" data-filter="Guides" id="filterGuides">How-to Guides</button>
     </div>
 
-    <section style="margin-top:35px">
-        <h2>About Us</h2>
-        <p>Smart Article Portal aims to provide useful, original and informative content for readers.</p>
-    </section>
+    <div class="grid" id="articles"></div>
+    <p class="empty" id="empty">No matching articles found.</p>
+  </section>
+
+  <article class="article-view" id="articleView">
+    <button class="btn" id="backButton">← Back to articles</button>
+    <div id="articleContent"></div>
+  </article>
+
+  <section class="notice" style="margin-top:30px">
+    <strong id="noticeTitle">Editorial policy</strong>
+    <p id="noticeText">
+      We aim to publish useful, original and accurate information.
+      Important claims should be checked against reliable sources.
+    </p>
+  </section>
 
 </main>
 
 <footer>
-    <p>
-        <a href="/about.html">About Us</a>
-        <a href="/contact.html">Contact</a>
-        <a href="/privacy-policy.html">Privacy Policy</a>
-        <a href="/disclaimer.html">Disclaimer</a>
-    </p>
-    <p>© 2026 Smart Article Portal. All rights reserved.</p>
+  <p>
+    <a href="./about.html" id="aboutLink">About Us</a>
+    <a href="./contact.html" id="contactLink">Contact</a>
+    <a href="./privacy-policy.html" id="privacyLink">Privacy Policy</a>
+    <a href="./disclaimer.html" id="disclaimerLink">Disclaimer</a>
+  </p>
+  <p>© <span id="year"></span> Smart Article Portal</p>
 </footer>
+
+<script>
+const translations = {
+  en: {
+    tagline: "Useful knowledge, explained simply.",
+    languageLabel: "Language:",
+    navHome: "Home",
+    navArticles: "Articles",
+    heroTitle: "Discover useful articles for everyday life",
+    heroDescription: "Explore technology, business, education and practical guides.",
+    search: "Search articles...",
+    searchButton: "Search",
+    articlesTitle: "Explore Articles",
+    all: "All",
+    technology: "Technology",
+    business: "Business",
+    education: "Education",
+    guides: "How-to Guides",
+    empty: "No matching articles found.",
+    back: "← Back to articles",
+    noticeTitle: "Editorial policy",
+    noticeText: "We aim to publish useful, original and accurate information. Important claims should be checked against reliable sources.",
+    about: "About Us",
+    contact: "Contact",
+    privacy: "Privacy Policy",
+    disclaimer: "Disclaimer",
+    read: "Read article",
+    articles: [
+      {
+        id: "technology-guide",
+        category: "Technology",
+        title: "How to Choose the Right Technology Tools",
+        description: "A practical approach to comparing digital tools before choosing one.",
+        body: "<p>Choosing a technology tool begins with identifying the problem you need to solve. Make a list of essential features, compare supported devices, and check the privacy policy before creating an account.</p><h2>Compare the important features</h2><p>Review usability, accessibility, reliability, customer support and total cost. Free plans may have usage limits, so read the current terms carefully.</p><h2>Protect your data</h2><p>Use strong passwords, enable two-factor authentication where available, and avoid uploading confidential information to tools you do not trust.</p><p><strong>Note:</strong> This is a general introductory guide. Check the tool provider's official documentation for current details.</p>"
+      },
+      {
+        id: "business-planning",
+        category: "Business",
+        title: "A Simple Checklist for Better Business Planning",
+        description: "Understand your customers, costs, goals and ways to measure progress.",
+        body: "<p>A practical business plan explains who your customers are, what problem you solve, and why customers may choose your product or service.</p><h2>Calculate costs</h2><p>List fixed costs, variable costs, expected revenue and cash-flow needs. Use realistic assumptions and update estimates when new information becomes available.</p><h2>Measure progress</h2><p>Choose a few useful measures, such as customer enquiries, conversion rate, repeat purchases and operating costs. Review them regularly.</p>"
+      },
+      {
+        id: "education-skills",
+        category: "Education",
+        title: "How to Build a Consistent Learning Routine",
+        description: "Small, regular study sessions can make learning easier to manage.",
+        body: "<p>Start with one clear learning goal. Break it into small tasks and schedule short sessions that fit your daily routine.</p><h2>Use active recall</h2><p>After studying, close your notes and explain the key ideas from memory. Revisit difficult material after increasing intervals.</p><h2>Track your progress</h2><p>Keep a simple record of what you learned and what needs more practice. Adjust the plan instead of giving up when a session is missed.</p>"
+      },
+      {
+        id: "online-safety",
+        category: "Guides",
+        title: "Basic Steps to Stay Safer Online",
+        description: "Simple habits for protecting accounts and personal information.",
+        body: "<p>Use a unique password for each important account. A reputable password manager can help you create and store strong passwords.</p><h2>Recognize suspicious messages</h2><p>Be careful with urgent requests for money, passwords or verification codes. Visit a service by typing its official address instead of following an unexpected link.</p><h2>Keep devices updated</h2><p>Install operating-system and browser updates when available, and review app permissions regularly.</p>"
+      }
+    ]
+  },
+  hi: {
+    tagline: "उपयोगी जानकारी, आसान भाषा में।",
+    languageLabel: "भाषा:",
+    navHome: "होम",
+    navArticles: "लेख",
+    heroTitle: "रोजमर्रा के काम आने वाले लेख पढ़ें",
+    heroDescription: "टेक्नोलॉजी, बिजनेस, शिक्षा और उपयोगी गाइड देखें।",
+    search: "लेख खोजें...",
+    searchButton: "खोजें",
+    articlesTitle: "सभी लेख",
+    all: "सभी",
+    technology: "टेक्नोलॉजी",
+    business: "बिजनेस",
+    education: "शिक्षा",
+    guides: "कैसे करें",
+    empty: "इस खोज से संबंधित लेख नहीं मिला।",
+    back: "← लेखों पर वापस जाएँ",
+    noticeTitle: "संपादकीय नीति",
+    noticeText: "हम उपयोगी, मौलिक और सही जानकारी देने का प्रयास करते हैं। महत्वपूर्ण दावों की विश्वसनीय स्रोतों से जाँच करनी चाहिए।",
+    about: "हमारे बारे में",
+    contact: "संपर्क",
+    privacy: "गोपनीयता नीति",
+    disclaimer: "अस्वीकरण",
+    read: "पूरा लेख पढ़ें",
+    articles: [
+      {
+        id: "technology-guide",
+        category: "Technology",
+        title: "सही टेक्नोलॉजी टूल कैसे चुनें?",
+        description: "डिजिटल टूल चुनने से पहले उनकी तुलना करने का आसान तरीका।",
+        body: "<p>किसी टेक्नोलॉजी टूल को चुनने से पहले यह तय करें कि आपको कौन-सी समस्या हल करनी है। जरूरी सुविधाओं की सूची बनाएँ और अलग-अलग टूल की तुलना करें।</p><h2>जरूरी सुविधाएँ देखें</h2><p>इस्तेमाल करने में आसानी, डिवाइस सपोर्ट, विश्वसनीयता, सहायता और कुल खर्च की तुलना करें। मुफ्त प्लान में उपयोग की सीमाएँ हो सकती हैं।</p><h2>अपने डेटा की सुरक्षा करें</h2><p>मजबूत पासवर्ड रखें और जहाँ उपलब्ध हो, टू-फैक्टर ऑथेंटिकेशन चालू करें। संवेदनशील जानकारी अनजान टूल पर अपलोड न करें।</p><p><strong>नोट:</strong> यह एक सामान्य जानकारी वाला लेख है। नई जानकारी के लिए संबंधित सेवा के आधिकारिक दस्तावेज देखें।</p>"
+      },
+      {
+        id: "business-planning",
+        category: "Business",
+        title: "बेहतर बिजनेस प्लान बनाने की आसान चेकलिस्ट",
+        description: "ग्राहक, खर्च, लक्ष्य और काम की प्रगति को समझें।",
+        body: "<p>एक उपयोगी बिजनेस प्लान बताता है कि आपके ग्राहक कौन हैं, उनकी समस्या क्या है और आपकी सेवा उनके लिए कैसे उपयोगी हो सकती है।</p><h2>खर्च का हिसाब रखें</h2><p>निश्चित खर्च, बदलते खर्च, संभावित आय और नकदी की जरूरत लिखें। वास्तविक अनुमान बनाएँ और नई जानकारी मिलने पर उन्हें अपडेट करें।</p><h2>प्रगति मापें</h2><p>ग्राहकों की पूछताछ, बिक्री, दोबारा खरीद और संचालन खर्च जैसे जरूरी संकेतकों की नियमित समीक्षा करें।</p>"
+      },
+      {
+        id: "education-skills",
+        category: "Education",
+        title: "नियमित पढ़ाई की आदत कैसे बनाएँ?",
+        description: "छोटे और नियमित अध्ययन सत्र सीखने को आसान बना सकते हैं।",
+        body: "<p>एक स्पष्ट लक्ष्य से शुरुआत करें। उसे छोटे कामों में बाँटें और अपनी दिनचर्या के अनुसार पढ़ने का समय तय करें।</p><h2>याद करके दोहराएँ</h2><p>पढ़ने के बाद नोट्स बंद करके मुख्य बातें अपनी याददाश्त से बताने की कोशिश करें। कठिन विषयों को कुछ अंतराल के बाद फिर दोहराएँ।</p><h2>प्रगति लिखें</h2><p>क्या सीखा और किस विषय में अभ्यास चाहिए, इसका छोटा रिकॉर्ड रखें। एक दिन छूटने पर योजना फिर शुरू करें।</p>"
+      },
+      {
+        id: "online-safety",
+        category: "Guides",
+        title: "इंटरनेट पर सुरक्षित रहने के आसान तरीके",
+        description: "अपने अकाउंट और निजी जानकारी की सुरक्षा के लिए जरूरी आदतें।",
+        body: "<p>हर महत्वपूर्ण अकाउंट के लिए अलग और मजबूत पासवर्ड रखें। पासवर्ड मैनेजर उपयोगी हो सकता है।</p><h2>संदिग्ध संदेश पहचानें</h2><p>पैसे, पासवर्ड या OTP माँगने वाले अचानक आए संदेशों से सावधान रहें। अनजान लिंक के बजाय सेवा की आधिकारिक वेबसाइट स्वयं खोलें।</p><h2>डिवाइस अपडेट रखें</h2><p>उपलब्ध सिस्टम और ब्राउज़र अपडेट इंस्टॉल करें और ऐप की अनुमतियों की समय-समय पर जाँच करें।</p>"
+      }
+    ]
+  }
+};
+
+let currentLanguage = "en";
+let currentFilter = "All";
+
+const $ = id => document.getElementById(id);
+
+function currentContent() {
+  return translations[currentLanguage];
+}
+
+function renderArticles() {
+  const t = currentContent();
+  const query = $("search").value.trim().toLowerCase();
+  const list = t.articles.filter(article => {
+    const matchesCategory = currentFilter === "All" || article.category === currentFilter;
+    const matchesQuery = (article.title + " " + article.description + " " + article.category)
+      .toLowerCase().includes(query);
+    return matchesCategory && matchesQuery;
+  });
+
+  $("articles").innerHTML = list.map(article => `
+    <article class="card">
+      <span class="badge">${t[article.category.toLowerCase()] || article.category}</span>
+      <h3>${article.title}</h3>
+      <p>${article.description}</p>
+      <button class="readmore" data-read="${article.id}">${t.read} →</button>
+    </article>
+  `).join("");
+
+  $("empty").style.display = list.length ? "none" : "block";
+
+  document.querySelectorAll("[data-read]").forEach(button => {
+    button.addEventListener("click", () => openArticle(button.dataset.read));
+  });
+}
+
+function openArticle(id) {
+  const article = currentContent().articles.find(item => item.id === id);
+  if (!article) return;
+
+  const t = currentContent();
+  $("articleContent").innerHTML = `
+    <span class="badge">${t[article.category.toLowerCase()] || article.category}</span>
+    <h1>${article.title}</h1>
+    <p>${article.description}</p>
+    <div class="article-body">${article.body}</div>
+  `;
+
+  $("articleList").style.display = "none";
+  $("articleView").style.display = "block";
+  history.replaceState(null, "", "#article-" + id);
+  window.scrollTo(0, 0);
+}
+
+function showHome() {
+  $("articleView").style.display = "none";
+  $("articleList").style.display = "block";
+  history.replaceState(null, "", location.pathname);
+  renderArticles();
+  window.scrollTo(0, 0);
+}
+
+function setLanguage(language) {
+  currentLanguage = language;
+  const t = currentContent();
+
+  document.documentElement.lang = language;
+  $("tagline").textContent = t.tagline;
+  $("languageLabel").textContent = t.languageLabel;
+  $("navHome").textContent = t.navHome;
+  $("navArticles").textContent = t.navArticles;
+  $("heroTitle").textContent = t.heroTitle;
+  $("heroDescription").textContent = t.heroDescription;
+  $("search").placeholder = t.search;
+  $("searchButton").textContent = t.searchButton;
+  $("articlesTitle").textContent = t.articlesTitle;
+  $("filterAll").textContent = t.all;
+  $("filterTech").textContent = t.technology;
+  $("filterBusiness").textContent = t.business;
+  $("filterEducation").textContent = t.education;
+  $("filterGuides").textContent = t.guides;
+  $("empty").textContent = t.empty;
+  $("backButton").textContent = t.back;
+  $("noticeTitle").textContent = t.noticeTitle;
+  $("noticeText").textContent = t.noticeText;
+  $("aboutLink").textContent = t.about;
+  $("contactLink").textContent = t.contact;
+  $("privacyLink").textContent = t.privacy;
+  $("disclaimerLink").textContent = t.disclaimer;
+
+  renderArticles();
+
+  const hash = location.hash.match(/^#article-(.+)$/);
+  if (hash) openArticle(hash[1]);
+}
+
+document.querySelectorAll("[data-filter]").forEach(button => {
+  button.addEventListener("click", () => {
+    currentFilter = button.dataset.filter;
+    document.querySelectorAll("[data-filter]").forEach(item =>
+      item.classList.toggle("active", item === button)
+    );
+    renderArticles();
+    $("articleList").scrollIntoView({ behavior: "smooth" });
+  });
+});
+
+document.querySelectorAll("nav [data-category]").forEach(link => {
+  link.addEventListener("click", () => {
+    currentFilter = link.dataset.category;
+    document.querySelectorAll("[data-filter]").forEach(item =>
+      item.classList.toggle("active", item.dataset.filter === currentFilter)
+    );
+    renderArticles();
+  });
+});
+
+$("searchButton").addEventListener("click", renderArticles);
+$("search").addEventListener("input", renderArticles);
+$("language").addEventListener("change", event => setLanguage(event.target.value));
+$("backButton").addEventListener("click", showHome);
+$("year").textContent = new Date().getFullYear();
+
+setLanguage("en");
+</script>
 
 </body>
 </html>
