@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Article Portal | Trending Topics & Guides</title>
+
+<meta name="description" content="Discover trending topics, technology, business, education and useful how-to guides.">
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #222;
+}
+
+header {
+    background: #14213d;
+    color: white;
+    padding: 22px 16px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 10px;
+}
+
+header p {
+    margin: 0;
+    color: #dbe5ff;
+}
+
+nav {
+    background: #fff;
+    padding: 14px 10px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+nav a {
+    display: inline-block;
+    margin: 5px 8px;
+    color: #14213d;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px 15px;
+}
+
+.section-title {
+    margin-bottom: 18px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 18px;
+}
+
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px #0000000d;
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #14213d;
+}
+
+.card p {
+    line-height: 1.6;
+    color: #555;
+}
+
+.badge {
+    display: inline-block;
+    background: #e5edff;
+    color: #174ea6;
+    padding: 5px 9px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+footer {
+    margin-top: 35px;
+    padding: 25px 15px;
+    background: #14213d;
+    color: white;
+    text-align: center;
+}
+
+footer a {
+    color: white;
+    margin: 0 8px;
+}
+
+footer p {
+    line-height: 1.8;
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 25px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Smart Article Portal</h1>
+    <p>Explore useful knowledge, technology and trending topics</p>
+</header>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="#technology">Technology</a>
+    <a href="#business">Business</a>
+    <a href="#education">Education</a>
+    <a href="#guides">How-to Guides</a>
+</nav>
+
+<main class="container">
+
+    <h2 class="section-title">Explore Our Articles</h2>
+
+    <div class="grid">
+
+        <article class="card" id="technology">
+            <span class="badge">Technology</span>
+            <h3>Technology and AI Guides</h3>
+            <p>Learn about useful technology, artificial intelligence tools and digital solutions.</p>
+        </article>
+
+        <article class="card" id="business">
+            <span class="badge">Business</span>
+            <h3>Business and Market Insights</h3>
+            <p>Explore business information, market developments and practical business guides.</p>
+        </article>
+
+        <article class="card" id="education">
+            <span class="badge">Education</span>
+            <h3>Education and Career</h3>
+            <p>Discover educational resources, career guidance and learning opportunities.</p>
+        </article>
+
+        <article class="card" id="guides">
+            <span class="badge">How-to Guides</span>
+            <h3>Practical Step-by-Step Guides</h3>
+            <p>Find helpful explanations and instructions for everyday problems.</p>
+        </article>
+
+    </div>
+
+    <section style="margin-top:35px">
+        <h2>About Us</h2>
+        <p>Smart Article Portal aims to provide useful, original and informative content for readers.</p>
+    </section>
+
+</main>
+
+<footer>
+    <p>
+        <a href="/about.html">About Us</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/privacy-policy.html">Privacy Policy</a>
+        <a href="/disclaimer.html">Disclaimer</a>
+    </p>
+    <p>© 2026 Smart Article Portal. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
