@@ -4,7 +4,7 @@ Stdlib only. The API key is read from the FREETHEAI_API_KEY environment variable
 import difflib, json, os, re, sys, time, urllib.error, urllib.request
 from datetime import datetime, timezone
 
-BASE = os.environ.get("FREETHEAI_BASE_URL", "https://api.freetheai.xyz/v1").rstrip("/")
+BASE = os.environ.get("FREETHEAI_BASE_URL", "https://api.freetheai.org/v1").rstrip("/")
 KEY = os.environ.get("FREETHEAI_API_KEY", "").strip()
 MODEL = os.environ.get("FREETHEAI_MODEL", "").strip()
 try:
