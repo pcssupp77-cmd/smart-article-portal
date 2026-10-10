@@ -65,15 +65,20 @@ def call(method, path, body=None, retries=3):
             fail(f"Network/parse error on {path}: {e}")
 
 
-def pick_model():
+PREFER = ["fta/bbl/gpt-5.4-mini", "fta/cat/deepseek-ai/deepseek-v4-flash-0731", "fta/bbl/gemini-3.5-flash",
+          "fta/bbl/gemini-3.1-flash-lite", "fta/bbl/gemini-2.5-flash-lite"]
+
+
+def pick_models():
     if MODEL:
-        return MODEL
+        return [MODEL]
     ids = [m.get("id") for m in call("GET", "/models").get("data", []) if m.get("id")]
     if not ids:
         fail("No models returned by /models for this key.")
     print("Models available (first 25):", ", ".join(ids[:25]))
-    print("Using first model. To choose one, set repository variable FREETHEAI_MODEL.")
-    return ids[0]
+    first = [m for m in PREFER if m in ids]
+    rest = [m for m in ids if m not in first and "/dog/" not in m]
+    return first + rest
 
 
 def load():
@@ -158,19 +163,22 @@ def main():
         fail("FREETHEAI_API_KEY is empty. Add it under Settings > Secrets and variables > Actions.")
     raw, items = load()
     before = len(items)
-    model = pick_model()
-    print(f"Base: {BASE} | model: {model} | target: {COUNT} article(s)")
+    models = pick_models()
+    print(f"Base: {BASE} | models to try: {models[:4]} | target: {COUNT} article(s)")
     titles = [str(e.get("title_en") or e.get("title") or "") for e in items]
     for i in range(COUNT):
         cat, topic = TOPICS[(len(items) + i) % len(TOPICS)]
-        for attempt in (1, 2):
-            a, err = generate(model, cat, topic, titles)
+        for attempt, model in enumerate(models[:4], 1):
+            try:
+                a, err = generate(model, cat, topic, titles)
+            except SystemExit:
+                a, err = None, "HTTP error (see ERROR line above)"
             err = err or (check(a) if isinstance(a, dict) else "not an object")
             if not err and is_dup(a, items):
                 err = "duplicate of an existing article"
             if not err:
                 break
-            print(f"Attempt {attempt} rejected: {err}")
+            print(f"Attempt {attempt} ({model}) rejected: {err}")
             a = None
         if not a:
             continue
@@ -184,7 +192,7 @@ def main():
             "published_at": now.isoformat(timespec="seconds"), "status": "published"})
         titles.append(a["title_en"])
         save(raw)
-        print("Added:", a["title_en"])
+        print("Added:", a["title_en"], "| model:", model)
     added = len(items) - before
     print(f"Done. Added {added}; total {len(items)}.")
     if added == 0:
