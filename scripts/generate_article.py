@@ -133,23 +133,24 @@ def generate(model, cat, topic, titles):
     user = f"""Write an evergreen explainer article on: {topic}
 Category: {cat}
 JSON keys: title_en, title_hi, category, description_en (max 160 chars), description_hi (max 160 chars),
-content_en (300-400 words, paragraphs separated by blank lines), content_hi (the same article in natural Hindi, Devanagari), tags (3-5 short strings).
+content_en (250-300 words, paragraphs separated by blank lines), content_hi (the same article in natural Hindi, Devanagari), tags (3-5 short strings).
 Rules: no breaking news, no prices, no statistics, no tender or company claims, no invented sources or quotes.
 Describe general knowledge only. Label any estimate as an estimate. Do not copy existing articles.
 Avoid titles similar to: {json.dumps(titles[-25:], ensure_ascii=False)}"""
     r = call("POST", "/chat/completions", {
-        "model": model, "temperature": 0.6, "max_tokens": 2200,
+        "model": model, "temperature": 0.6, "max_tokens": 4500,
         "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]})
     try:
-        text = r["choices"][0]["message"]["content"]
-    except (KeyError, IndexError, TypeError):
+        text = r["choices"][0]["message"]["content"] or ""
+        fr = r["choices"][0].get("finish_reason")
+    except (KeyError, IndexError, TypeError, AttributeError):
         return None, "unexpected response shape"
     text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
     i, j = text.find("{"), text.rfind("}")
     try:
-        return json.loads(text[i:j + 1]), None
+        return json.loads(text[i:j + 1], strict=False), None
     except (ValueError, TypeError):
-        return None, "response was not valid JSON"
+        return None, f"not valid JSON (finish_reason={fr}, length={len(text)}, starts={text[:100]!r}, ends={text[-60:]!r})"
 
 
 def main():
