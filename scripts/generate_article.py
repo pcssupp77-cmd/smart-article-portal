@@ -31,3 +31,164 @@ NOTE_HI = "\n\nनोट: यह AI की सहायता से तैय�
 
 def fail(msg, code=None):
     hints = {
+        401: "Key rejected. Re-create the FREETHEAI_API_KEY secret.",
+        403: "Forbidden. Check dashboard check-in, model name, key status.",
+        404: "Not found. Check base URL and model name.",
+        400: "Bad request. Model name is probably invalid.",
+        429: "Quota or rate limit reached. Try later.",
+    }
+    print("ERROR:", msg.replace(KEY, "***") if KEY else msg)
+    if code in hints:
+        print("HINT:", hints[code])
+    sys.exit(1)
+
+
+def call(method, path, body=None, retries=3):
+    data = json.dumps(body).encode() if body is not None else None
+    for n in range(1, retries + 1):
+        req = urllib.request.Request(BASE + path, data=data, method=method, headers={
+            "Authorization": "Bearer " + KEY, "Content-Type": "application/json",
+            "Accept": "application/json", "User-Agent": UA})
+        try:
+            with urllib.request.urlopen(req, timeout=90) as r:
+                return json.loads(r.read().decode())
+        except urllib.error.HTTPError as e:
+            raw = e.read().decode(errors="replace")[:400]
+            if e.code in (429, 500, 502, 503, 504) and n < retries:
+                time.sleep(15 * n)
+                continue
+            fail(f"HTTP {e.code} on {method} {path}: {raw}", e.code)
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+            if n < retries:
+                time.sleep(15 * n)
+                continue
+            fail(f"Network/parse error on {path}: {e}")
+
+
+def pick_model():
+    if MODEL:
+        return MODEL
+    ids = [m.get("id") for m in call("GET", "/models").get("data", []) if m.get("id")]
+    if not ids:
+        fail("No models returned by /models for this key.")
+    print("Models available (first 25):", ", ".join(ids[:25]))
+    print("Using first model. To choose one, set repository variable FREETHEAI_MODEL.")
+    return ids[0]
+
+
+def load():
+    if not os.path.exists(DATA):
+        return {"articles": []}, []
+    try:
+        raw = json.load(open(DATA, encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        fail(f"{DATA} is invalid JSON; refusing to overwrite: {e}")
+    if isinstance(raw, list):
+        return raw, raw
+    if isinstance(raw, dict) and isinstance(raw.get("articles"), list):
+        return raw, raw["articles"]
+    fail(f"{DATA} has an unexpected structure; refusing to overwrite.")
+
+
+def save(raw):
+    tmp = DATA + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(raw, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+    os.replace(tmp, DATA)
+
+
+def norm(s):
+    return re.sub(r"\W+", " ", str(s).lower()).strip()
+
+
+def is_dup(a, items):
+    t, b = norm(a["title_en"]), norm(a["content_en"])[:1500]
+    for e in items:
+        et = norm(e.get("title_en") or e.get("title") or "")
+        eb = norm(e.get("content_en") or e.get("content") or "")[:1500]
+        if et and difflib.SequenceMatcher(None, t, et).ratio() > 0.8:
+            return True
+        if eb and difflib.SequenceMatcher(None, b, eb).ratio() > 0.7:
+            return True
+    return False
+
+
+def check(a):
+    for k in HEADS:
+        if not a.get(k):
+            return f"missing {k}"
+    if not isinstance(a["tags"], list):
+        return "tags not a list"
+    if len(a["content_en"].split()) < 150:
+        return "English content too short"
+    if len(re.findall(r"[\u0900-\u097F]", a["content_hi"])) < 200:
+        return "Hindi content too short or not Devanagari"
+    return None
+
+
+def generate(model, cat, topic, titles):
+    system = ("You write careful, original, educational articles for an Indian audience. Reply with ONE JSON object only, "
+              "no markdown fences, no commentary.")
+    user = f"""Write an evergreen explainer article on: {topic}
+Category: {cat}
+JSON keys: title_en, title_hi, category, description_en (max 160 chars), description_hi (max 160 chars),
+content_en (300-400 words, paragraphs separated by blank lines), content_hi (the same article in natural Hindi, Devanagari), tags (3-5 short strings).
+Rules: no breaking news, no prices, no statistics, no tender or company claims, no invented sources or quotes.
+Describe general knowledge only. Label any estimate as an estimate. Do not copy existing articles.
+Avoid titles similar to: {json.dumps(titles[-25:], ensure_ascii=False)}"""
+    r = call("POST", "/chat/completions", {
+        "model": model, "temperature": 0.6, "max_tokens": 2200,
+        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]})
+    try:
+        text = r["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError):
+        return None, "unexpected response shape"
+    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
+    i, j = text.find("{"), text.rfind("}")
+    try:
+        return json.loads(text[i:j + 1]), None
+    except (ValueError, TypeError):
+        return None, "response was not valid JSON"
+
+
+def main():
+    if not KEY:
+        fail("FREETHEAI_API_KEY is empty. Add it under Settings > Secrets and variables > Actions.")
+    raw, items = load()
+    before = len(items)
+    model = pick_model()
+    print(f"Base: {BASE} | model: {model} | target: {COUNT} article(s)")
+    titles = [str(e.get("title_en") or e.get("title") or "") for e in items]
+    for i in range(COUNT):
+        cat, topic = TOPICS[(len(items) + i) % len(TOPICS)]
+        for attempt in (1, 2):
+            a, err = generate(model, cat, topic, titles)
+            err = err or (check(a) if isinstance(a, dict) else "not an object")
+            if not err and is_dup(a, items):
+                err = "duplicate of an existing article"
+            if not err:
+                break
+            print(f"Attempt {attempt} rejected: {err}")
+            a = None
+        if not a:
+            continue
+        now = datetime.now(timezone.utc)
+        slug = re.sub(r"[^a-z0-9]+", "-", a["title_en"].lower()).strip("-")[:60] or "article"
+        items.append({
+            "id": f"{slug}-{now:%Y%m%d%H%M%S}", "title_en": a["title_en"].strip(), "title_hi": a["title_hi"].strip(),
+            "category": cat, "description_en": a["description_en"].strip(), "description_hi": a["description_hi"].strip(),
+            "content_en": a["content_en"].strip() + NOTE_EN, "content_hi": a["content_hi"].strip() + NOTE_HI,
+            "tags": [str(t) for t in a["tags"]][:6], "sources": [], "ai_generated": True,
+            "published_at": now.isoformat(timespec="seconds"), "status": "published"})
+        titles.append(a["title_en"])
+        save(raw)
+        print("Added:", a["title_en"])
+    added = len(items) - before
+    print(f"Done. Added {added}; total {len(items)}.")
+    if added == 0:
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
