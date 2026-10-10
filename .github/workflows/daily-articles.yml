@@ -7,7 +7,7 @@ on:
         description: "Articles to generate (1-3)"
         default: "1"
   schedule:
-    # 12:30 UTC = 18:00 IST. FreeTheAi needs a Discord /checkin each UTC day (starts 05:30 IST), so check in before 18:00 IST.
+    # 12:30 UTC = 18:00 IST. Free models need a daily check-in on the freetheai.org dashboard (UTC day starts 05:30 IST), so check in before 18:00 IST.
     - cron: "30 12 * * *"
 
 permissions:
