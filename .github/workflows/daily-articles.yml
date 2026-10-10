@@ -2,80 +2,44 @@ name: AI Article Generator
 
 on:
   workflow_dispatch:
+    inputs:
+      count:
+        description: "Articles to generate (1-3)"
+        default: "1"
   schedule:
-    - cron: "30 3 * * *"
+    # 12:30 UTC = 18:00 IST. FreeTheAi needs a Discord /checkin each UTC day (starts 05:30 IST), so check in before 18:00 IST.
+    - cron: "30 12 * * *"
 
 permissions:
   contents: write
 
+concurrency:
+  group: article-generator
+  cancel-in-progress: false
+
 jobs:
   generate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Generate articles
         env:
-          AI_KEY: ${{ secrets.FREETHEAI_API_KEY }}
-        run: |
-          cat > generate.py <<'PY'
-          import os,json,urllib.request
-          from datetime import date
-
-          key=os.environ.get("AI_KEY")
-          if not key:
-              raise SystemExit("Missing FREETHEAI_API_KEY secret")
-
-          prompt="""Write one original, useful SEO article about Indian mining,
-          Odisha business, transport or technology. Output ONLY valid JSON:
-          {"title_en":"English title","title_hi":"Hindi title",
-          "category":"Mining","description":"Short summary",
-          "content":"Article of 500+ words in English and Hindi",
-          "tags":["India","Mining"],"status":"published"}"""
-
-          data=json.dumps({
-            "model":"free",
-            "messages":[{"role":"user","content":prompt}],
-            "temperature":0.7
-          }).encode()
-
-          req=urllib.request.Request(
-            "https://api.freetheai.org/v1/chat/completions",
-            data=data,
-            headers={"Authorization":"Bearer "+key,
-                     "Content-Type":"application/json"}
-          )
-
-          with urllib.request.urlopen(req,timeout=90) as r:
-              result=json.loads(r.read())
-
-          text=result["choices"][0]["message"]["content"]
-          text=text.strip().removeprefix("```json").removesuffix("```").strip()
-          article=json.loads(text)
-          article["date"]=str(date.today())
-
-          path="articles.json"
-          try:
-              with open(path,encoding="utf-8") as f:
-                  db=json.load(f)
-          except (FileNotFoundError,json.JSONDecodeError):
-              db={"articles":[]}
-
-          db["articles"].append(article)
-          with open(path,"w",encoding="utf-8") as f:
-              json.dump(db,f,ensure_ascii=False,indent=2)
-          print("Article generated:",article["title_en"])
-          PY
-          python generate.py
-
-      - name: Save article
+          FREETHEAI_API_KEY: ${{ secrets.FREETHEAI_API_KEY }}
+          FREETHEAI_MODEL: ${{ vars.FREETHEAI_MODEL }}
+          ARTICLES_PER_RUN: ${{ github.event.inputs.count || vars.ARTICLES_PER_DAY || '1' }}
+        run: python scripts/generate_article.py
+      - name: Validate articles.json
+        run: python -c "import json; d=json.load(open('articles.json',encoding='utf-8')); print('valid JSON')"
+      - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add articles.json
-          git diff --cached --quiet || git commit -m "Generate daily article"
-          git push
+          if git diff --cached --quiet; then echo "No changes to commit"; else
+            git commit -m "Add AI-generated article(s)"
+            git push
+          fi
