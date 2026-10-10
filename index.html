@@ -31,3 +31,54 @@ footer{max-width:900px;margin:0 auto;padding:16px;color:var(--mut);font-size:.9r
 </header>
 <main>
 <section id="list"><h2 data-i="h"></h2><div id="chips" class="chips" role="group" aria-label="Categories"></div><div id="cards" class="grid" aria-live="polite"></div></section>
+<article id="view" hidden></article>
+</main>
+<footer>
+<p><strong data-i="pol"></strong><br><span data-i="polt"></span></p>
+<nav><a href="about.html">About Us</a><a href="contact.html">Contact</a><a href="privacy-policy.html">Privacy Policy</a><a href="disclaimer.html">Disclaimer</a></nav>
+<p>© <span id="yr"></span> Smart Article Portal</p>
+</footer>
+<script>
+const T={en:{tag:'Useful knowledge, explained simply.',h:'Explore Articles',search:'Search articles',all:'All',load:'Loading articles…',none:'No matching articles found.',err:'Could not load articles. Please try again later.',back:'← Back to articles',pol:'Editorial policy',polt:'We aim to publish useful, original and accurate information. Important claims should be checked against reliable sources.'},
+hi:{tag:'उपयोगी जानकारी, सरल भाषा में।',h:'लेख देखें',search:'लेख खोजें',all:'सभी',load:'लेख लोड हो रहे हैं…',none:'कोई लेख नहीं मिला।',err:'लेख लोड नहीं हो सके। कृपया बाद में प्रयास करें।',back:'← लेखों पर वापस',pol:'संपादकीय नीति',polt:'हम उपयोगी, मौलिक और सटीक जानकारी प्रकाशित करने का प्रयास करते हैं। महत्वपूर्ण दावों को विश्वसनीय स्रोतों से जाँचना चाहिए।'}};
+const $=s=>document.querySelector(s);
+let lang='en',cat='all',arts=[],state='loading';
+try{lang=localStorage.getItem('lang')==='hi'?'hi':'en'}catch(e){}
+$('#yr').textContent=new Date().getFullYear();
+function el(t,p,k){const e=document.createElement(t);Object.assign(e,p||{});(k||[]).forEach(c=>e.append(c));return e}
+function norm(a,i){const s=(x,y)=>String(a[x]||a[y]||'');return{id:String(a.id||'a'+i),cat:a.category||'General',date:a.published_at||a.date||'',tags:Array.isArray(a.tags)?a.tags:[],status:a.status,
+t:{en:s('title_en','title'),hi:s('title_hi','title_en')||s('title','title')},d:{en:s('description_en','description')||s('summary','summary'),hi:s('description_hi','description_en')},c:{en:s('content_en','content')||s('body','body'),hi:s('content_hi','content_en')}}}
+function fmt(d){const x=new Date(d);return isNaN(x)?'':x.toLocaleDateString(lang==='hi'?'hi-IN':'en-IN',{dateStyle:'medium'})}
+function render(){
+const t=T[lang];document.documentElement.lang=lang;
+document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t[e.dataset.i]);
+$('#q').placeholder=t.search;$('#q').setAttribute('aria-label',t.search);
+document.querySelectorAll('.lb').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===lang));
+const m=location.hash.match(/^#a=(.+)$/),a=m&&arts.find(x=>x.id===decodeURIComponent(m[1]));
+$('#list').hidden=!!a;$('#view').hidden=!a;
+a?showArticle(a,t):showList(t)}
+function showList(t){
+document.title='Smart Article Portal | Hindi & English Guides';
+const chips=$('#chips'),box=$('#cards');chips.replaceChildren();box.replaceChildren();
+if(state==='loading')return box.append(el('p',{className:'msg',textContent:t.load}));
+if(state==='error')return box.append(el('p',{className:'msg',textContent:t.err}));
+['all',...new Set(arts.map(a=>a.cat))].forEach(c=>{const b=el('button',{textContent:c==='all'?t.all:c});b.setAttribute('aria-pressed',c===cat);b.onclick=()=>{cat=c;render()};chips.append(b)});
+const q=$('#q').value.trim().toLowerCase();
+const r=arts.filter(a=>(cat==='all'||a.cat===cat)&&(!q||(a.t.en+a.t.hi+a.c.en+a.c.hi).toLowerCase().includes(q)));
+if(!r.length)return box.append(el('p',{className:'msg',textContent:t.none}));
+r.forEach(a=>box.append(el('div',{className:'card'},[el('div',{className:'meta',textContent:a.cat+(a.date?' · '+fmt(a.date):'')}),
+el('h3',{},[el('a',{href:'#a='+encodeURIComponent(a.id),textContent:a.t[lang]||a.t.en})]),el('p',{textContent:a.d[lang]||a.d.en})])))}
+function showArticle(a,t){
+const v=$('#view');v.replaceChildren();const ti=a.t[lang]||a.t.en;document.title=ti+' | Smart Article Portal';
+const md=document.querySelector('meta[name=description]');if(md)md.content=(a.d[lang]||a.d.en).slice(0,160);
+v.append(el('a',{className:'back',href:'#',textContent:t.back}),el('h1',{textContent:ti}),el('p',{className:'meta',textContent:a.cat+(a.date?' · '+fmt(a.date):'')}));
+(a.c[lang]||a.c.en).split(/\n+/).filter(Boolean).forEach(p=>v.append(el('p',{textContent:p})));
+a.tags.forEach(x=>v.append(el('span',{className:'tag',textContent:String(x)})));window.scrollTo(0,0)}
+document.querySelectorAll('.lb').forEach(b=>b.onclick=()=>{lang=b.dataset.l;try{localStorage.setItem('lang',lang)}catch(e){}render()});
+$('#q').oninput=render;addEventListener('hashchange',render);
+fetch('articles.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{
+const l=Array.isArray(j)?j:(j.articles||[]);arts=l.map(norm).filter(a=>a.status!=='draft'&&(a.t.en||a.t.hi)).sort((x,y)=>String(y.date).localeCompare(String(x.date)));state='ok';render()}).catch(()=>{state='error';render()});
+render();
+</script>
+</body>
+</html>
