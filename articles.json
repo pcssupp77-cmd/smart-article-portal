@@ -1,6 +1,9 @@
 {
   "site": "Smart Article Portal",
-  "languages": ["hi", "en"],
+  "languages": [
+    "hi",
+    "en"
+  ],
   "articles": [
     {
       "id": "online-safety-guide",
@@ -11,8 +14,33 @@
       "description_hi": "अपने ऑनलाइन अकाउंट और निजी जानकारी की सुरक्षा के व्यावहारिक तरीके जानें।",
       "content_en": "Use unique passwords for important accounts. Enable two-factor authentication when available. Never share OTPs or passwords with unknown people. Check website addresses carefully before entering personal information.",
       "content_hi": "महत्वपूर्ण अकाउंट के लिए अलग और मजबूत पासवर्ड रखें। जहाँ उपलब्ध हो, टू-फैक्टर ऑथेंटिकेशन चालू करें। किसी अनजान व्यक्ति के साथ OTP या पासवर्ड साझा न करें। निजी जानकारी डालने से पहले वेबसाइट का पता जाँचें।",
-      "tags": ["online safety", "internet security", "ऑनलाइन सुरक्षा"],
+      "tags": [
+        "online safety",
+        "internet security",
+        "ऑनलाइन सुरक्षा"
+      ],
       "status": "draft"
+    },
+    {
+      "id": "how-to-choose-between-tipper-trucks-and-hyva-trucks-for-bulk-20261010080039",
+      "title_en": "How to Choose Between Tipper Trucks and Hyva Trucks for Bulk Material Hauling",
+      "title_hi": "थोक सामग्री ढुलाई के लिए टिपर ट्रक और हाइवा ट्रक में कैसे चुनें",
+      "category": "Transport",
+      "description_en": "A practical guide to selecting the right truck type for bulk hauling based on load, site conditions, unloading needs, and maintenance.",
+      "description_hi": "लोड, साइट की स्थिति, अनलोडिंग जरूरत और रखरखाव के आधार पर सही ट्रक चुनने की व्यावहारिक गाइड।",
+      "content_en": "Choosing between a tipper truck and a hyva truck starts with the material you move and the way it must be unloaded. For loose bulk materials such as sand, gravel, soil, or demolition waste, both vehicles can work well. The key difference is in how the body lifts, how smoothly the load comes out, and how well the truck fits your site conditions.\n\nA tipper truck is often a general-purpose choice. It is useful when you need a reliable truck for varied hauling tasks, especially where the route includes mixed road conditions and the job does not need highly specialized unloading. A hyva truck, in common usage, usually refers to a hydraulically operated tipping setup designed for efficient dumping. In many fleets, the word is used for trucks with strong lifting gear suited to repetitive bulk discharge. If your operation involves frequent unloading and you want quicker cycle times, this setup may be preferable.\n\nYou should also think about the working environment. Narrow sites, uneven ground, and overhead obstructions can affect tipping safety. A truck that lifts more smoothly and remains stable during discharge may be easier to use in constrained spaces. If the material is sticky, wet, or prone to clinging to the body, a stronger hydraulic lift and a well-shaped bed can help the load release better.\n\nMaintenance matters too. Compare hydraulic system access, chassis durability, body wear, and ease of repair. The best choice is not the one with the most features, but the one that matches your payload type, loading method, unloading frequency, and workshop support. As an estimate, a fleet with mostly short, repetitive hauls may benefit more from a purpose-built tipping system, while a mixed-use fleet may prefer a simpler general-purpose tipper.\n\nNote: This is an AI-assisted general explainer, not news or professional advice. Verify specifics with official sources.",
+      "content_hi": "टिपर ट्रक और हाइवा ट्रक में चुनाव करते समय सबसे पहले यह देखें कि आप कौन-सी सामग्री ढोते हैं और उसे कैसे खाली करना होता है। रेत, गिट्टी, मिट्टी, निर्माण मलबा जैसी ढीली थोक सामग्री के लिए दोनों वाहन काम आ सकते हैं। असली फर्क उठाने की प्रणाली, सामग्री के बाहर निकलने की सहजता और साइट की परिस्थितियों के साथ मेल में होता है।\n\nटिपर ट्रक अक्सर सामान्य उपयोग के लिए बेहतर माना जाता है। यह तब उपयोगी है जब अलग-अलग तरह के काम करने हों, रास्तों की स्थिति मिश्रित हो, और अनलोडिंग के लिए बहुत खास व्यवस्था की जरूरत न हो। हाइवा ट्रक, सामान्य बोलचाल में, अक्सर हाइड्रोलिक टिपिंग सिस्टम वाले वाहन को कहा जाता है जो तेज और प्रभावी डंपिंग के लिए बनाया गया होता है। अगर आपके काम में बार-बार माल उतारना पड़ता है और चक्र समय कम रखना जरूरी है, तो यह व्यवस्था अधिक उपयुक्त हो सकती है।\n\nकाम की जगह भी बहुत महत्वपूर्ण है। संकरी साइट, असमान जमीन और ऊपर की रुकावटें टिपिंग सुरक्षा को प्रभावित कर सकती हैं। अगर वाहन धीरे और स्थिर तरीके से उठता है, तो सीमित जगह में उसका उपयोग आसान हो सकता है। यदि सामग्री चिपचिपी, गीली या बॉडी से चिपकने वाली हो, तो मजबूत हाइड्रोलिक लिफ्ट और सही आकार की बॉडी मदद कर सकती है।\n\nरखरखाव भी सोचने लायक है। हाइड्रोलिक सिस्टम की पहुंच, चेसिस की मजबूती, बॉडी के घिसाव और मरम्मत की आसान उपलब्धता की तुलना करें। सबसे अच्छा विकल्प वह नहीं होता जिसमें सबसे ज्यादा फीचर हों, बल्कि वह होता है जो आपके लोड, लोडिंग तरीके, अनलोडिंग की आवृत्ति और वर्कशॉप सहायता के साथ सही बैठे। एक अनुमान के अनुसार, जिन बेड़ों में छोटे-छोटे और बार-बार होने वाले काम ज्यादा हों, उन्हें विशेष टिपिंग सिस्टम से लाभ हो सकता है, जबकि मिश्रित उपयोग वाले बेड़े को सरल सामान्य टिपर अधिक उपयोगी लग सकता है।\n\nनोट: यह AI की सहायता से तैयार किया गया सामान्य जानकारी वाला लेख है, समाचार या पेशेवर सलाह नहीं। विशेष तथ्य आधिकारिक स्रोतों से जाँच लें।",
+      "tags": [
+        "tipper-truck",
+        "hyva-truck",
+        "bulk-hauling",
+        "heavy-vehicles",
+        "transport"
+      ],
+      "sources": [],
+      "ai_generated": true,
+      "published_at": "2026-10-10T08:00:39+00:00",
+      "status": "published"
     }
   ]
 }
