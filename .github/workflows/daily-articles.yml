@@ -1,14 +1,14 @@
 name: AI Article Generator
 
 on:
+  schedule:
+    - cron: "30 2 * * *"   # 08:00 IST
+    - cron: "30 8 * * *"   # 14:00 IST
   workflow_dispatch:
     inputs:
-      count:
-        description: "Articles to generate (1-3)"
-        default: "1"
-  schedule:
-    # 12:30 UTC = 18:00 IST. Free models need a daily check-in on the freetheai.org dashboard (UTC day starts 05:30 IST), so check in before 18:00 IST.
-    - cron: "30 12 * * *"
+      posts:
+        description: "How many posts to create"
+        default: "5"
 
 permissions:
   contents: write
@@ -18,28 +18,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  generate:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Generate articles
+
+      - name: Generate posts
         env:
+          POSTS_PER_RUN: ${{ github.event.inputs.posts || '3' }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FREETHEAI_API_KEY: ${{ secrets.FREETHEAI_API_KEY }}
-          FREETHEAI_MODEL: ${{ vars.FREETHEAI_MODEL }}
-          ARTICLES_PER_RUN: ${{ github.event.inputs.count || vars.ARTICLES_PER_DAY || '1' }}
-        run: python scripts/generate_article.py
-      - name: Validate articles.json
-        run: python -c "import json; d=json.load(open('articles.json',encoding='utf-8')); print('valid JSON')"
+          ADSENSE_ID: ${{ secrets.ADSENSE_ID }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+          SITE_URL: https://smart-article-portal.pages.dev
+          SITE_NAME: Smart Article Portal
+          TRENDS_GEO: IN
+        run: python scripts/generate.py
+
       - name: Commit and push
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add articles.json
-          if git diff --cached --quiet; then echo "No changes to commit"; else
-            git commit -m "Add AI-generated article(s)"
-            git push
-          fi
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || (git commit -m "Auto posts $(date -u +%F-%H%M)" && git push)
