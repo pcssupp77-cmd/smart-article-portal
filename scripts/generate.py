@@ -99,18 +99,19 @@ def fetch_trends():
 
 
 # ---------------------------------------------------------------- LLM
-_MODEL = None
+_MODELS = []
+_IDX = 0
 
 
-def pick_gemini_model():
-    """Ask Google which models this key can use and pick a good flash model."""
-    global _MODEL
-    if _MODEL:
-        return _MODEL
+def gemini_models():
+    """Ordered list of usable Gemini models for this key (best first)."""
+    global _MODELS
+    if _MODELS:
+        return _MODELS
     forced = env("GEMINI_MODEL")
     if forced:
-        _MODEL = forced
-        return _MODEL
+        _MODELS = [forced]
+        return _MODELS
     data = json.loads(http(
         "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200",
         headers={"x-goog-api-key": GEMINI_KEY}))
@@ -121,28 +122,30 @@ def pick_gemini_model():
 
     def rank(n):
         r = 0
-        if n == "gemini-flash-latest":
-            r -= 20
         if "flash" in n:
             r -= 10
         if "lite" in n:
-            r += 3
+            r -= 2
+        if n.endswith("-latest"):
+            r += 1
         if any(x in n for x in ("preview", "exp", "image", "tts", "audio", "live",
-                                "thinking", "robotics", "computer", "embedding")):
+                                "thinking", "robotics", "computer", "embedding",
+                                "pro", "gemma", "nano", "veo", "imagen")):
             r += 20
         return r
 
     names.sort(reverse=True)
     names.sort(key=rank)
-    if not names:
+    _MODELS = names[:8]
+    if not _MODELS:
         raise RuntimeError("No Gemini models available for this key")
-    _MODEL = names[0]
-    print("Using model:", _MODEL)
-    return _MODEL
+    print("Model order:", ", ".join(_MODELS))
+    return _MODELS
 
 
 def call_gemini(prompt):
-    model = pick_gemini_model()
+    model = gemini_models()[min(_IDX, len(gemini_models()) - 1)]
+    print("Trying model:", model)
     url = ("https://generativelanguage.googleapis.com/v1beta/models/"
            f"{model}:generateContent")
     body = {"contents": [{"parts": [{"text": prompt}]}],
@@ -165,8 +168,9 @@ def call_freetheai(prompt):
 
 
 def ask_llm(prompt):
+    global _IDX
     last = None
-    for attempt in range(3):
+    for attempt in range(8):
         try:
             if GEMINI_KEY:
                 raw = call_gemini(prompt)
@@ -178,8 +182,15 @@ def ask_llm(prompt):
             return json.loads(raw[a:b + 1], strict=False)
         except urllib.error.HTTPError as e:
             last = e
-            print("HTTP", e.code, "attempt", attempt + 1)
-            time.sleep(25 if e.code == 429 else 8)
+            try:
+                msg = e.read().decode("utf-8", "replace")[:400].replace("\n", " ")
+            except Exception:
+                msg = ""
+            print("HTTP", e.code, "->", msg)
+            if GEMINI_KEY and e.code in (403, 404) and _IDX < len(_MODELS) - 1:
+                _IDX += 1          # this model is refused: try the next one
+                continue
+            time.sleep(30 if e.code == 429 else 8)
         except SystemExit:
             raise
         except Exception as e:
