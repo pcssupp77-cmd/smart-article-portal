@@ -20,6 +20,7 @@ GEO = env("TRENDS_GEO", "IN")
 N = int(env("POSTS_PER_RUN", "5") or 5)
 ADSENSE = env("ADSENSE_ID")            # e.g. ca-pub-1234567890123456
 CONTACT = env("CONTACT_EMAIL", "contact@example.com")
+GROQ_KEY = env("GROQ_API_KEY")
 GEMINI_KEY = env("GEMINI_API_KEY")
 FT_KEY = env("FREETHEAI_API_KEY")
 
@@ -99,8 +100,53 @@ def fetch_trends():
 
 
 # ---------------------------------------------------------------- LLM
+_MODELS = []
+_IDX = 0
+
+
+def gemini_models():
+    """Ordered list of usable Gemini models for this key (best first)."""
+    global _MODELS
+    if _MODELS:
+        return _MODELS
+    forced = env("GEMINI_MODEL")
+    if forced:
+        _MODELS = [forced]
+        return _MODELS
+    data = json.loads(http(
+        "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200",
+        headers={"x-goog-api-key": GEMINI_KEY}))
+    names = [m["name"].split("/")[-1] for m in data.get("models", [])
+             if "generateContent" in m.get("supportedGenerationMethods", [])]
+    names = [n for n in names if n.startswith("gemini")]
+    print("Available models:", ", ".join(names))
+
+    def rank(n):
+        r = 0
+        if "flash" in n:
+            r -= 10
+        if "lite" in n:
+            r -= 2
+        if n.endswith("-latest"):
+            r += 1
+        if any(x in n for x in ("preview", "exp", "image", "tts", "audio", "live",
+                                "thinking", "robotics", "computer", "embedding",
+                                "pro", "gemma", "nano", "veo", "imagen", "omni", "vision")):
+            r += 20
+        return r
+
+    names.sort(reverse=True)
+    names.sort(key=rank)
+    _MODELS = [n for n in names if rank(n) < 15][:15]
+    if not _MODELS:
+        raise RuntimeError("No Gemini models available for this key")
+    print("Model order:", ", ".join(_MODELS))
+    return _MODELS
+
+
 def call_gemini(prompt):
-    model = env("GEMINI_MODEL", "gemini-2.5-flash")
+    model = gemini_models()[min(_IDX, len(gemini_models()) - 1)]
+    print("Trying model:", model)
     url = ("https://generativelanguage.googleapis.com/v1beta/models/"
            f"{model}:generateContent")
     body = {"contents": [{"parts": [{"text": prompt}]}],
@@ -109,6 +155,64 @@ def call_gemini(prompt):
     out = http(url, json.dumps(body).encode(),
                {"Content-Type": "application/json", "x-goog-api-key": GEMINI_KEY})
     return json.loads(out)["candidates"][0]["content"]["parts"][0]["text"]
+
+
+def groq_models():
+    """Usable Groq text models for this key, best first."""
+    global _MODELS
+    if _MODELS:
+        return _MODELS
+    forced = env("GROQ_MODEL")
+    if forced:
+        _MODELS = [forced]
+        return _MODELS
+    data = json.loads(http("https://api.groq.com/openai/v1/models",
+                           headers={"Authorization": f"Bearer {GROQ_KEY}"}))
+    ids = [m["id"] for m in data.get("data", []) if m.get("active", True)]
+    print("Groq models:", ", ".join(ids))
+    bad = ("whisper", "guard", "tts", "playai", "orpheus", "distil", "embed", "safeguard")
+    ids = [i for i in ids if not any(b in i for b in bad)]
+
+    def rank(i):
+        r = 0
+        if i == "llama-3.3-70b-versatile":
+            r -= 30
+        if "70b" in i:
+            r -= 10
+        if "versatile" in i:
+            r -= 5
+        if "gpt-oss-120b" in i:
+            r -= 8
+        elif "gpt-oss" in i:
+            r -= 4
+        if "8b" in i or "instant" in i:
+            r += 5
+        if "preview" in i or "vision" in i:
+            r += 10
+        return r
+
+    ids.sort(key=rank)
+    _MODELS = ids[:8]
+    if not _MODELS:
+        raise RuntimeError("No Groq models available for this key")
+    print("Groq model order:", ", ".join(_MODELS))
+    return _MODELS
+
+
+def call_groq(prompt):
+    ms = groq_models()
+    model = ms[min(_IDX, len(ms) - 1)]
+    print("Trying Groq model:", model)
+    body = {"model": model,
+            "messages": [{"role": "system", "content": "You output only valid JSON."},
+                         {"role": "user", "content": prompt}],
+            "temperature": 0.6, "max_tokens": 4000,
+            "response_format": {"type": "json_object"}}
+    out = http("https://api.groq.com/openai/v1/chat/completions",
+               json.dumps(body).encode(),
+               {"Content-Type": "application/json",
+                "Authorization": f"Bearer {GROQ_KEY}"})
+    return json.loads(out)["choices"][0]["message"]["content"]
 
 
 def call_freetheai(prompt):
@@ -123,22 +227,40 @@ def call_freetheai(prompt):
 
 
 def ask_llm(prompt):
+    global _IDX
     last = None
-    for attempt in range(3):
+    for attempt in range(30):
         try:
-            if GEMINI_KEY:
+            if GROQ_KEY:
+                raw = call_groq(prompt)
+            elif GEMINI_KEY:
                 raw = call_gemini(prompt)
             elif FT_KEY:
                 raw = call_freetheai(prompt)
             else:
-                raise SystemExit("Set GEMINI_API_KEY (or FREETHEAI_API_KEY) secret")
+                raise SystemExit("Set GROQ_API_KEY (or GEMINI_API_KEY) secret")
             a, b = raw.find("{"), raw.rfind("}")
             return json.loads(raw[a:b + 1], strict=False)
         except urllib.error.HTTPError as e:
             last = e
-            print("HTTP", e.code, "attempt", attempt + 1)
-            time.sleep(25 if e.code == 429 else 8)
+            try:
+                msg = e.read().decode("utf-8", "replace").replace("\n", " ")
+            except Exception:
+                msg = ""
+            print("HTTP", e.code, "->", msg[:250])
+            # model not usable on this key (no access / not found / zero free quota)
+            dead = (e.code in (403, 404)
+                    or (e.code == 429 and "limit: 0" in msg)
+                    or (e.code == 400 and "json_validate_failed" not in msg))
+            if (GROQ_KEY or GEMINI_KEY) and dead:
+                if _IDX < len(_MODELS) - 1:
+                    _IDX += 1
+                    continue
+                raise RuntimeError("No usable model left on this key")
+            time.sleep(35 if e.code == 429 else 8)
         except SystemExit:
+            raise
+        except RuntimeError:
             raise
         except Exception as e:
             last = e
@@ -332,6 +454,8 @@ def main():
     build_index(arts)
     build_feeds(arts)
     print(f"Done. {made} new posts, {len(arts)} total.")
+    if made == 0 and fails > 0:
+        raise SystemExit("No posts created - check the errors above")
 
 
 if __name__ == "__main__":
