@@ -20,6 +20,7 @@ GEO = env("TRENDS_GEO", "IN")
 N = int(env("POSTS_PER_RUN", "5") or 5)
 ADSENSE = env("ADSENSE_ID")            # e.g. ca-pub-1234567890123456
 CONTACT = env("CONTACT_EMAIL", "contact@example.com")
+GSC_TOKEN = env("GSC_TOKEN", "X98iXRJTXyClV9iX9PgKRA6gjnxs7yhAZgJe5gHQtgg")
 GROQ_KEY = env("GROQ_API_KEY")
 GEMINI_KEY = env("GEMINI_API_KEY")
 FT_KEY = env("FREETHEAI_API_KEY")
@@ -323,6 +324,7 @@ def page(title, desc, path, body, ld="", noindex=False):
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <link rel="canonical" href="{url}">{robots}
+<meta name="google-site-verification" content="{esc(GSC_TOKEN)}">
 <link rel="alternate" type="application/rss+xml" title="{esc(SITE_NAME)}" href="{SITE}/feed.xml">
 <meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(desc)}">
 <meta property="og:type" content="article"><meta property="og:url" content="{url}">
