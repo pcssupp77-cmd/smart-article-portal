@@ -99,53 +99,8 @@ def fetch_trends():
 
 
 # ---------------------------------------------------------------- LLM
-_MODELS = []
-_IDX = 0
-
-
-def gemini_models():
-    """Ordered list of usable Gemini models for this key (best first)."""
-    global _MODELS
-    if _MODELS:
-        return _MODELS
-    forced = env("GEMINI_MODEL")
-    if forced:
-        _MODELS = [forced]
-        return _MODELS
-    data = json.loads(http(
-        "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200",
-        headers={"x-goog-api-key": GEMINI_KEY}))
-    names = [m["name"].split("/")[-1] for m in data.get("models", [])
-             if "generateContent" in m.get("supportedGenerationMethods", [])]
-    names = [n for n in names if n.startswith("gemini")]
-    print("Available models:", ", ".join(names))
-
-    def rank(n):
-        r = 0
-        if "flash" in n:
-            r -= 10
-        if "lite" in n:
-            r -= 2
-        if n.endswith("-latest"):
-            r += 1
-        if any(x in n for x in ("preview", "exp", "image", "tts", "audio", "live",
-                                "thinking", "robotics", "computer", "embedding",
-                                "pro", "gemma", "nano", "veo", "imagen")):
-            r += 20
-        return r
-
-    names.sort(reverse=True)
-    names.sort(key=rank)
-    _MODELS = names[:8]
-    if not _MODELS:
-        raise RuntimeError("No Gemini models available for this key")
-    print("Model order:", ", ".join(_MODELS))
-    return _MODELS
-
-
 def call_gemini(prompt):
-    model = gemini_models()[min(_IDX, len(gemini_models()) - 1)]
-    print("Trying model:", model)
+    model = env("GEMINI_MODEL", "gemini-2.5-flash")
     url = ("https://generativelanguage.googleapis.com/v1beta/models/"
            f"{model}:generateContent")
     body = {"contents": [{"parts": [{"text": prompt}]}],
@@ -168,9 +123,8 @@ def call_freetheai(prompt):
 
 
 def ask_llm(prompt):
-    global _IDX
     last = None
-    for attempt in range(8):
+    for attempt in range(3):
         try:
             if GEMINI_KEY:
                 raw = call_gemini(prompt)
@@ -182,15 +136,8 @@ def ask_llm(prompt):
             return json.loads(raw[a:b + 1], strict=False)
         except urllib.error.HTTPError as e:
             last = e
-            try:
-                msg = e.read().decode("utf-8", "replace")[:400].replace("\n", " ")
-            except Exception:
-                msg = ""
-            print("HTTP", e.code, "->", msg)
-            if GEMINI_KEY and e.code in (403, 404) and _IDX < len(_MODELS) - 1:
-                _IDX += 1          # this model is refused: try the next one
-                continue
-            time.sleep(30 if e.code == 429 else 8)
+            print("HTTP", e.code, "attempt", attempt + 1)
+            time.sleep(25 if e.code == 429 else 8)
         except SystemExit:
             raise
         except Exception as e:
@@ -385,8 +332,6 @@ def main():
     build_index(arts)
     build_feeds(arts)
     print(f"Done. {made} new posts, {len(arts)} total.")
-    if made == 0 and fails > 0:
-        raise SystemExit("No posts created - check the errors above")
 
 
 if __name__ == "__main__":
