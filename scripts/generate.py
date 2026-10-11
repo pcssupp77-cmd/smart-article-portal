@@ -99,8 +99,50 @@ def fetch_trends():
 
 
 # ---------------------------------------------------------------- LLM
+_MODEL = None
+
+
+def pick_gemini_model():
+    """Ask Google which models this key can use and pick a good flash model."""
+    global _MODEL
+    if _MODEL:
+        return _MODEL
+    forced = env("GEMINI_MODEL")
+    if forced:
+        _MODEL = forced
+        return _MODEL
+    data = json.loads(http(
+        "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200",
+        headers={"x-goog-api-key": GEMINI_KEY}))
+    names = [m["name"].split("/")[-1] for m in data.get("models", [])
+             if "generateContent" in m.get("supportedGenerationMethods", [])]
+    names = [n for n in names if n.startswith("gemini")]
+    print("Available models:", ", ".join(names))
+
+    def rank(n):
+        r = 0
+        if n == "gemini-flash-latest":
+            r -= 20
+        if "flash" in n:
+            r -= 10
+        if "lite" in n:
+            r += 3
+        if any(x in n for x in ("preview", "exp", "image", "tts", "audio", "live",
+                                "thinking", "robotics", "computer", "embedding")):
+            r += 20
+        return r
+
+    names.sort(reverse=True)
+    names.sort(key=rank)
+    if not names:
+        raise RuntimeError("No Gemini models available for this key")
+    _MODEL = names[0]
+    print("Using model:", _MODEL)
+    return _MODEL
+
+
 def call_gemini(prompt):
-    model = env("GEMINI_MODEL", "gemini-2.5-flash")
+    model = pick_gemini_model()
     url = ("https://generativelanguage.googleapis.com/v1beta/models/"
            f"{model}:generateContent")
     body = {"contents": [{"parts": [{"text": prompt}]}],
@@ -332,6 +374,8 @@ def main():
     build_index(arts)
     build_feeds(arts)
     print(f"Done. {made} new posts, {len(arts)} total.")
+    if made == 0 and fails > 0:
+        raise SystemExit("No posts created - check the errors above")
 
 
 if __name__ == "__main__":
