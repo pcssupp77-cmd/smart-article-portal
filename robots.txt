@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://smart-article-portal.pages.dev/sitemap.xml
